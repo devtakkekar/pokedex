@@ -3,6 +3,9 @@ A modern web-based Pokédex application that lets you explore and discover Poké
 
 ## Preview
 ![image](https://github.com/user-attachments/assets/9fe99b3e-621f-480e-aeff-723f65626f1b)
+![image](https://github.com/user-attachments/assets/3aa49252-8200-4647-8045-c3538371e027)
+
+
 
 
 
