@@ -92,36 +92,21 @@ async function fetchPokemonDetails(url) {
 async function filterByTypes() {
     if (selectedTypes.includes('all') || selectedTypes.length === 0) {
         filteredPokemon = [...allPokemon];
-        applySearchAndSort();
-        return;
+    } else {
+        filteredPokemon = allPokemon.filter(pokemon =>
+            pokemon.types.some(t => selectedTypes.includes(t.type.name))
+        );
     }
-    loading.style.display = 'flex';
-    // Find all Pokémon that are not loaded yet
-    let notLoaded = allPokemonList.filter(poke => !allPokemon.find(ap => ap.name === poke.name));
-    // We'll collect all matching Pokémon here
-    let matchingPokemon = allPokemon.filter(pokemon =>
-        pokemon.types.some(t => selectedTypes.includes(t.type.name))
-    );
-    // Batch fetch and filter
-    const batchSize = 20;
-    for (let i = 0; i < notLoaded.length; i += batchSize) {
-        const batch = notLoaded.slice(i, i + batchSize);
-        const details = await Promise.all(batch.map(poke => fetchPokemonDetails(poke.url)));
-        // Add to allPokemon
-        allPokemon = allPokemon.concat(details);
-        // Add only those matching the selected types
-        for (const pokemon of details) {
-            if (pokemon.types.some(t => selectedTypes.includes(t.type.name))) {
-                matchingPokemon.push(pokemon);
-            }
-        }
-        // Optionally, update the UI as results come in (uncomment next 2 lines for progressive rendering)
-        // filteredPokemon = [...matchingPokemon];
-        // applySearchAndSort();
-    }
-    filteredPokemon = [...matchingPokemon];
     applySearchAndSort();
-    loading.style.display = 'none';
+    // If filter is active and not all Pokémon are loaded, and the filtered list is too short to fill the page, load more
+    if (!selectedTypes.includes('all') && offset < allPokemonList.length) {
+        // Estimate if the page is filled (e.g., less than 2 rows of cards visible)
+        const cardsPerRow = Math.floor(pokemonContainer.offsetWidth / 220) || 4;
+        const minCardsToFill = cardsPerRow * 2;
+        if (filteredPokemon.length < minCardsToFill) {
+            fetchPokemonBatch();
+        }
+    }
 }
 
 // Fetch a batch of Pokémon
@@ -140,10 +125,9 @@ async function fetchPokemonBatch() {
         // Filter out Pokémon with missing images or invalid data
         const validPokemon = pokemonDetails.filter(pokemon => pokemon && pokemon.sprites && pokemon.sprites.front_default);
         allPokemon = allPokemon.concat(validPokemon);
-        filteredPokemon = [...allPokemon];
-        renderPokemon();
         offset += limit;
-
+        // Instead of rendering all, always re-apply the filter after loading
+        filterByTypes();
         // Hide loading if we've reached the end
         if (offset >= allPokemonList.length) {
             loading.style.display = 'none';
@@ -376,7 +360,7 @@ filterButtons.forEach(button => {
                 selectedTypes = ['all'];
                 document.querySelector('.filter-btn[data-type="all"]').classList.add('active');
             } else {
-                document.querySelector('.filter-btn[data-type="all"]').classlist.remove('active');
+                document.querySelector('.filter-btn[data-type="all"]').classList.remove('active');
             }
         }
         updateFilterButtonStyles();
