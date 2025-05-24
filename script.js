@@ -92,20 +92,27 @@ async function fetchPokemonDetails(url) {
 async function filterByTypes() {
     if (selectedTypes.includes('all') || selectedTypes.length === 0) {
         filteredPokemon = [...allPokemon];
-    } else {
-        filteredPokemon = allPokemon.filter(pokemon =>
-            pokemon.types.some(t => selectedTypes.includes(t.type.name))
-        );
+        applySearchAndSort();
+        return;
     }
+    // Progressive filtering: show matches as soon as they are found
+    filteredPokemon = allPokemon.filter(pokemon =>
+        pokemon.types.some(t => selectedTypes.includes(t.type.name))
+    );
     applySearchAndSort();
-    // If filter is active and not all Pokémon are loaded, and the filtered list is too short to fill the page, load more
-    if (!selectedTypes.includes('all') && offset < allPokemonList.length) {
-        // Estimate if the page is filled (e.g., less than 2 rows of cards visible)
-        const cardsPerRow = Math.floor(pokemonContainer.offsetWidth / 220) || 4;
-        const minCardsToFill = cardsPerRow * 2;
-        if (filteredPokemon.length < minCardsToFill) {
-            fetchPokemonBatch();
+    // If not all Pokémon are loaded, keep loading and updating UI until all are loaded
+    async function loadAllMatches() {
+        while (offset < allPokemonList.length) {
+            await fetchPokemonBatch();
+            filteredPokemon = allPokemon.filter(pokemon =>
+                pokemon.types.some(t => selectedTypes.includes(t.type.name))
+            );
+            applySearchAndSort();
+            await new Promise(res => setTimeout(res, 50));
         }
+    }
+    if (offset < allPokemonList.length) {
+        loadAllMatches();
     }
 }
 
