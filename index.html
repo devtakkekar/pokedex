@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pokédex</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="pokeball-bg"></div>
+    <div class="container">
+        <header>
+            <h1>Pokédex</h1>
+            <div class="search-container">
+                <div class="group">
+                  <svg viewBox="0 0 24 24" aria-hidden="true" class="search-icon">
+                    <g>
+                      <path
+                        d="M21.53 20.47l-3.66-3.66C19.195 15.24 20 13.214 20 11c0-4.97-4.03-9-9-9s-9 4.03-9 9 4.03 9 9 9c2.215 0 4.24-.804 5.808-2.13l3.66 3.66c.147.146.34.22.53.22s.385-.073.53-.22c.295-.293.295-.767.002-1.06zM3.5 11c0-4.135 3.365-7.5 7.5-7.5s7.5 3.365 7.5 7.5-3.365 7.5-7.5 7.5-7.5-3.365-7.5-7.5z"
+                      ></path>
+                    </g>
+                  </svg>
+                  <input
+                    id="searchInput"
+                    class="input"
+                    type="search"
+                    placeholder="Search Pokémon..."
+                    name="searchbar"
+                  />
+                </div>
+                <div class="sort-group">
+                  <select id="sortSelect" class="sort-input">
+                      <option value="id">Sort by ID</option>
+                      <option value="name">Sort by Name</option>
+                  </select>
+                </div>
+            </div>
+            <div class="filter-container">
+                <button class="filter-btn active" data-type="all">All</button>
+                <button class="filter-btn" data-type="normal">Normal</button>
+                <button class="filter-btn" data-type="fire">Fire</button>
+                <button class="filter-btn" data-type="water">Water</button>
+                <button class="filter-btn" data-type="electric">Electric</button>
+                <button class="filter-btn" data-type="grass">Grass</button>
+                <button class="filter-btn" data-type="ice">Ice</button>
+                <button class="filter-btn" data-type="fighting">Fighting</button>
+                <button class="filter-btn" data-type="poison">Poison</button>
+                <button class="filter-btn" data-type="ground">Ground</button>
+                <button class="filter-btn" data-type="flying">Flying</button>
+                <button class="filter-btn" data-type="psychic">Psychic</button>
+                <button class="filter-btn" data-type="bug">Bug</button>
+                <button class="filter-btn" data-type="rock">Rock</button>
+                <button class="filter-btn" data-type="ghost">Ghost</button>
+                <button class="filter-btn" data-type="dragon">Dragon</button>
+                <button class="filter-btn" data-type="dark">Dark</button>
+                <button class="filter-btn" data-type="steel">Steel</button>
+                <button class="filter-btn" data-type="fairy">Fairy</button>
+            </div>
+        </header>
+        <main id="pokemonContainer" class="pokemon-grid">
+            <!-- Pokémon cards will be inserted here -->
+        </main>
+        <div class="loading" id="loading">
+          <div class="dot-spinner">
+            <div class="dot-spinner__dot"></div>
+            <div class="dot-spinner__dot"></div>
+            <div class="dot-spinner__dot"></div>
+            <div class="dot-spinner__dot"></div>
+            <div class="dot-spinner__dot"></div>
+            <div class="dot-spinner__dot"></div>
+            <div class="dot-spinner__dot"></div>
+            <div class="dot-spinner__dot"></div>
+          </div>
+        </div>
+    </div>
+    <div class="modal" id="pokemonModal">
+        <div class="modal-content">
+            <button class="close-modal">&times;</button>
+            <button class="nav-arrow nav-prev">&lt;</button>
+            <button class="nav-arrow nav-next">&gt;</button>
+            <div class="modal-header">
+                <h2 class="modal-title"></h2>
+                <span class="modal-id"></span>
+            </div>
+            <img class="modal-image" src="" alt="">
+            <div class="modal-types"></div>
+            <div class="modal-sections">
+                <div class="modal-section about-section">
+                    <div class="about-row">
+                        <div class="about-col">
+                            <div class="about-icon"><span class="material-icons">fitness_center</span></div>
+                            <div class="about-value weight"></div>
+                            <div class="about-label">Weight</div>
+                        </div>
+                        <div class="about-col">
+                            <div class="about-icon"><span class="material-icons">height</span></div>
+                            <div class="about-value height"></div>
+                            <div class="about-label">Height</div>
+                        </div>
+                        <div class="about-col">
+                            <div class="about-icon"><span class="material-icons">flash_on</span></div>
+                            <div class="about-value abilities"></div>
+                            <div class="about-label">Move</div>
+                        </div>
+                    </div>
+                    <div class="about-item description">
+                        <p class="about-value description-text"></p>
+                    </div>
+                </div>
+                <div class="modal-section stats-section">
+                    <h3>Base Stats</h3>
+                    <div class="modal-stats"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <script src="script.js"></script>
+</body>
+</html> 
