@@ -66,9 +66,18 @@ const typeGlowColors = {
     all: '#444',
 };
 
+// Function to format Pokémon IDs for display
+function formatPokemonId(id) {
+    if (id < 1000) {
+        return `#${String(id).padStart(3, '0')}`;
+    } else {
+        return `#${id}`;
+    }
+}
+
 // Fetch the full list of Pokémon names/URLs on page load
 async function fetchAllPokemonList() {
-    const response = await fetch('https://pokeapi.co/api/v2/pokemon?limit=1302');
+    const response = await fetch('https://pokeapi.co/api/v2/pokemon?limit=10277');
     const data = await response.json();
     allPokemonList = data.results;
 }
@@ -117,26 +126,34 @@ async function filterByTypes() {
 
 // Fetch a batch of Pokémon
 async function fetchPokemonBatch() {
-    if (isLoading) return;
+    if (isLoading || offset >= allPokemonList.length) return;
     isLoading = true;
     loading.style.display = 'flex';
     try {
-        const response = await fetch(`https://pokeapi.co/api/v2/pokemon?offset=${offset}&limit=${limit}`);
-        const data = await response.json();
+        const batch = allPokemonList.slice(offset, offset + limit);
         const pokemonDetails = await Promise.all(
-            data.results.map(async (pokemon) => {
+            batch.map(async (pokemon) => {
                 const res = await fetch(pokemon.url);
                 return res.json();
             })
         );
-        allPokemon = allPokemon.concat(pokemonDetails);
+        // Filter out Pokémon with missing images or invalid data
+        const validPokemon = pokemonDetails.filter(pokemon => pokemon && pokemon.sprites && pokemon.sprites.front_default);
+        allPokemon = allPokemon.concat(validPokemon);
         filteredPokemon = [...allPokemon];
         renderPokemon();
         offset += limit;
+
+        // Hide loading if we've reached the end
+        if (offset >= allPokemonList.length) {
+            loading.style.display = 'none';
+        }
     } catch (error) {
         console.error('Error fetching Pokémon:', error);
     } finally {
-        loading.style.display = 'none';
+        if (offset < allPokemonList.length) {
+            loading.style.display = 'none';
+        }
         isLoading = false;
     }
 }
@@ -144,19 +161,22 @@ async function fetchPokemonBatch() {
 // Render Pokémon cards
 function renderPokemon(renderList = filteredPokemon) {
     pokemonContainer.innerHTML = '';
-    
+
     renderList.forEach((pokemon, index) => {
         const card = document.createElement('div');
         card.className = 'pokemon-card';
         card.setAttribute('data-name', pokemon.name);
-        
+    
         const types = pokemon.types.map(type => type.type.name);
-        
+        const imageUrl = pokemon.sprites.front_default ? pokemon.sprites.front_default : FALLBACK_IMAGE_URL;
+    
         card.innerHTML = `
-            <img src="${pokemon.sprites.front_default}" alt="${pokemon.name}" class="pokemon-image">
+            <div class="pokemon-image-container">
+                <img src="${imageUrl}" alt="${pokemon.name} image not found" class="pokemon-image">
+            </div>
             <div class="pokemon-info">
                 <h2 class="pokemon-name">${pokemon.name}</h2>
-                <p class="pokemon-id">#${String(pokemon.id).padStart(3, '0')}</p>
+                <p class="pokemon-id">${formatPokemonId(pokemon.id)}</p>
                 <div class="pokemon-types">
                     ${types.map(type => `
                         <span class="type-badge ${type}">${type}</span>
@@ -164,7 +184,7 @@ function renderPokemon(renderList = filteredPokemon) {
                 </div>
             </div>
         `;
-        
+    
         card.addEventListener('click', () => {
             console.log('Card clicked:', pokemon.name, index);
             showPokemonDetails(index, renderList);
@@ -175,7 +195,6 @@ function renderPokemon(renderList = filteredPokemon) {
 
 // Show Pokémon details in modal
 async function showPokemonDetails(index, list = null) {
-    console.log('showPokemonDetails called', index, list ? list[index] : null);
     const useList = list || filteredPokemon;
     currentPokemonIndex = index;
     const pokemon = useList[index];
@@ -188,8 +207,8 @@ async function showPokemonDetails(index, list = null) {
     const statColor = typeDarkColors[primaryType] || '#b87333';
     
     document.querySelector('.modal-title').textContent = pokemon.name;
-    document.querySelector('.modal-id').textContent = `#${String(pokemon.id).padStart(3, '0')}`;
-    document.querySelector('.modal-image').src = pokemon.sprites.front_default;
+    document.querySelector('.modal-id').textContent = formatPokemonId(pokemon.id);
+    document.querySelector('.modal-image').src = pokemon.sprites.front_default ? pokemon.sprites.front_default : 'path/to/fallback_image.png';
     document.querySelector('.modal-image').alt = pokemon.name;
     
     // Update types
@@ -201,7 +220,6 @@ async function showPokemonDetails(index, list = null) {
     // About section
     document.querySelector('.height').textContent = `${pokemon.height / 10} m`;
     document.querySelector('.weight').textContent = `${pokemon.weight / 10} kg`;
-    // Show only the first ability as "Move"
     document.querySelector('.abilities').textContent = pokemon.abilities[0]?.ability.name.replace('-', ' ') || '-';
     
     // Fetch species data for description
@@ -358,7 +376,7 @@ filterButtons.forEach(button => {
                 selectedTypes = ['all'];
                 document.querySelector('.filter-btn[data-type="all"]').classList.add('active');
             } else {
-                document.querySelector('.filter-btn[data-type="all"]').classList.remove('active');
+                document.querySelector('.filter-btn[data-type="all"]').classlist.remove('active');
             }
         }
         updateFilterButtonStyles();
@@ -408,4 +426,4 @@ window.addEventListener('scroll', () => {
     await fetchAllPokemonList();
     fetchPokemonBatch();
     updateFilterButtonStyles();
-})(); 
+})();
