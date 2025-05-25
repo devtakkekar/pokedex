@@ -370,6 +370,10 @@ filterButtons.forEach(button => {
                 document.querySelector('.filter-btn[data-type="all"]').classList.remove('active');
             }
         }
+        // Added check to wait for initial batch load if allPokemon is empty and 'all' is selected
+        if (selectedTypes.includes('all') && allPokemon.length === 0) {
+            await fetchPokemonBatch();
+        }
         updateFilterButtonStyles();
         await filterByTypes();
     });
